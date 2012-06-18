@@ -1,26 +1,26 @@
 (ns rscum.core
-	(:require [rscum.data :as data])
-	(:require [rscum.github :as github]))
+  (:require [rscum.data :as data])
+  (:require [rscum.github :as github]))
 
 (defn save-following [username]
-	(data/save-following username (github/following-users username)))
+  (data/save-following username (github/following-users username)))
 
 (defn save-watching [username]
-	(data/save-watching username (github/watching-repos username)))
+  (data/save-watching username (github/watching-repos username)))
 
 (defn crawl-iteration []
-	(let [username (data/next-crawl-username)]
-		(println "Crawling: " username)
-		(if (not (data/crawled? username))
-			(do 
-				(save-following username)
-				(save-watching username)))))
+  (let [username (data/next-crawl-username)]
+    (println "Crawling: " username)
+    (if (not (data/crawled? username))
+      (do
+        (save-following username)
+        (save-watching username)))))
 
 (defn crawl [target]
-	(letfn [(crawl-f []
-				(if (< (data/crawled-count) target)
-					(do
-						(crawl-iteration)
-						crawl-f)
-					nil))]
-		(trampoline crawl-f)))
+  (letfn [(crawl-f []
+        (if (< (data/crawled-count) target)
+          (do
+            (crawl-iteration)
+            crawl-f)
+          nil))]
+    (trampoline crawl-f)))
