@@ -3,8 +3,8 @@
 
 (def +redis-server+ {:host "localhost" :port 6379})
 
-(def +crawl-queue+ "crawl-queue")
 (def +crawled-users+ "crawled-users")
+(def +ordered-crawl-queue+ "ordered-crawl-queue")
 
 (defn crawled? [username]
   (redis/with-server +redis-server+
@@ -17,8 +17,6 @@
   (redis/with-server +redis-server+
     (redis/sadd +crawled-users+ username)
     (doseq [follow following]
-      (if (not (crawled? follow))
-        (redis/rpush +crawl-queue+ follow))
       (redis/sadd (user-following-key username) follow))))
 
 (defn save-watching [username watching]
@@ -28,11 +26,17 @@
 
 (defn next-crawl-username []
   (redis/with-server +redis-server+
-    (redis/lpop +crawl-queue+)))
+    (when-let [next-username (first (redis/zrevrange +ordered-crawl-queue+ 0 0))]
+      (redis/zrem +ordered-crawl-queue+ next-username)
+      next-username)))
 
 (defn crawled-count []
   (redis/with-server +redis-server+
     (redis/scard +crawled-users+)))
+
+(defn crawl-queue-len []
+  (redis/with-server +redis-server+
+    (redis/zcard +ordered-crawl-queue+)))
 
 (defn- load-users []
   (redis/smembers +crawled-users+))
@@ -44,3 +48,21 @@
   (redis/with-server +redis-server+
     (let [users (load-users)]
       (into {} (map (fn [user] [user (load-user-following user)]) users)))))
+
+(defn- user-rank-key [username]
+  (format "user:%s:rank" username))
+
+(defn save-ranks [user-ranks]
+  (redis/with-server +redis-server+
+    (doseq [user (keys user-ranks)]
+      (let [rank (user-ranks user)]
+        (redis/set (user-rank-key user) rank)
+        (if (not (crawled? user))
+          (redis/zadd +ordered-crawl-queue+ rank user))))))
+
+(defn get-users-by-rank []
+  (redis/with-server +redis-server+
+    (let [users (load-users)
+          get-f (fn [user] [user (->> (user-rank-key user) redis/get Double/parseDouble)])
+          user-ranks (mapv get-f users)]
+      (reverse (sort-by second user-ranks)))))

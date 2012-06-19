@@ -10,7 +10,7 @@
   (data/save-watching username (github/watching-repos username)))
 
 (defn crawl-iteration []
-  (let [username (data/next-crawl-username)]
+  (when-let [username (data/next-crawl-username)]
     (println "Crawling: " username)
     (if (not (data/crawled? username))
       (do
@@ -20,7 +20,7 @@
 (defn crawl
   ([target]
     (letfn [(crawl-f []
-          (if (< (data/crawled-count) target)
+          (if (and (< (data/crawled-count) target) (> (data/crawl-queue-len) 0))
             (do
               (crawl-iteration)
               crawl-f)
@@ -33,5 +33,12 @@
       (crawl target))))
 
 (defn rank []
-  (let [following-hash (data/load-following)]
-    (rank/page-rank following-hash)))
+  (time
+    (let [following-hash (data/load-following)
+          user-ranks (rank/page-rank following-hash)]
+      (data/save-ranks user-ranks))))
+
+(defn show-rank []
+  (let [ordered-users (data/get-users-by-rank)]
+    (doseq [[user rank] ordered-users]
+      (println "User: " user "\tRank: " (format "%.8f" rank)))))
