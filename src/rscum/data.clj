@@ -63,6 +63,7 @@
 (defn get-users-by-rank []
   (redis/with-server +redis-server+
     (let [users (load-users)
-          get-f (fn [user] [user (->> (user-rank-key user) redis/get Double/parseDouble)])
-          user-ranks (mapv get-f users)]
-      (reverse (sort-by second user-ranks)))))
+          get-f (fn [user] [user (->> (user-rank-key user) redis/get Double/parseDouble)])]
+      (->> (map get-f users)
+           (sort-by second)
+           reverse))))

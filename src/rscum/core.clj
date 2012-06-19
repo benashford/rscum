@@ -40,5 +40,5 @@
 
 (defn show-rank []
   (let [ordered-users (data/get-users-by-rank)]
-    (doseq [[user rank] ordered-users]
+    (doseq [[user rank] (take 100 ordered-users)]
       (println "User: " user "\tRank: " (format "%.8f" rank)))))
