@@ -33,4 +33,8 @@
         (add-edge graph key value)))
     (let [ranker (make-ranker graph 0.15)]
       (evaluate-rank ranker)
-      (into {} (map (fn [key] [key (get-vertex-score ranker key)]) (get-vertices graph))))))
+      (let [sorted (->> (map (fn [key] [key (get-vertex-score ranker key)]) (get-vertices graph))
+                        (sort-by second)
+                        reverse)
+            multiplier (/ 1 (second (first sorted)))]
+        (into {} (map (fn [[k v]] [k (* v multiplier)]) sorted))))))
