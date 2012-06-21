@@ -43,3 +43,13 @@
   (let [ordered-users (data/get-users-by-rank)]
     (doseq [[user rank] (take 100 ordered-users)]
       (println "User: " user "\tRank: " (format "%.8f" rank)))))
+
+(defn similarity [watching-data user-a user-b]
+  (stats/similarity (watching-data user-a) (watching-data user-b)))
+
+(defn most-similar-to [watching-data user-a]
+  (->>
+    (keys watching-data)
+    (remove #{user-a})
+    (map (fn [user-b] [user-b (similarity watching-data user-a user-b)]))
+    (sort-by second)))

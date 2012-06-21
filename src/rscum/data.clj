@@ -13,6 +13,12 @@
 (defn- user-following-key [username]
   (format "user:%s:following" username))
 
+(defn- user-watching-key [username]
+  (format "user:%s:watching" username))
+
+(defn- user-rank-key [username]
+  (format "user:%s:rank" username))
+
 (defn save-following [username following]
   (redis/with-server +redis-server+
     (redis/sadd +crawled-users+ username)
@@ -22,7 +28,7 @@
 (defn save-watching [username watching]
   (redis/with-server +redis-server+
     (doseq [watch watching]
-      (redis/sadd (format "user:%s:watching" username) watch))))
+      (redis/sadd (user-watching-key username) watch))))
 
 (defn next-crawl-username []
   (redis/with-server +redis-server+
@@ -44,13 +50,18 @@
 (defn- load-user-following [username]
   (redis/smembers (user-following-key username)))
 
+(defn- load-user-watching [username]
+  (redis/smembers (user-watching-key username)))
+
 (defn load-following []
   (redis/with-server +redis-server+
     (let [users (load-users)]
       (into {} (map (fn [user] [user (load-user-following user)]) users)))))
 
-(defn- user-rank-key [username]
-  (format "user:%s:rank" username))
+(defn load-watching []
+  (redis/with-server +redis-server+
+    (let [users (load-users)]
+      (into {} (map (fn [user] [user (load-user-watching user)]) users)))))
 
 (defn save-ranks [user-ranks]
   (redis/with-server +redis-server+
