@@ -37,4 +37,5 @@
                         (sort-by second)
                         reverse)
             multiplier (/ 1 (second (first sorted)))]
+        (println "HIGHEST RANKED: " (first sorted) " MULTIPLIER: " multiplier " OUT OF: " (count sorted))
         (into {} (map (fn [[k v]] [k (* v multiplier)]) sorted))))))
