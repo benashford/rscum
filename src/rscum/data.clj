@@ -67,3 +67,8 @@
       (->> (map get-f users)
            (sort-by second)
            reverse))))
+
+(defn delete-users [usernames]
+  (redis/with-server +redis-server+
+    (doseq [username usernames]
+      (redis/srem +crawled-users+ username))))
