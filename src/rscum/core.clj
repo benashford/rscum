@@ -1,7 +1,8 @@
 (ns rscum.core
   (:require [rscum.data :as data])
   (:require [rscum.github :as github])
-  (:require [rscum.rank :as rank]))
+  (:require [rscum.rank :as rank])
+  (:require [rscum.stats :as stats]))
 
 (defn save-following [username]
   (data/save-following username (github/following-users username)))
