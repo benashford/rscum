@@ -52,4 +52,5 @@
     (keys watching-data)
     (remove #{user-a})
     (map (fn [user-b] [user-b (similarity watching-data user-a user-b)]))
+    (filter #(> (second %) 0))
     (sort-by second)))
