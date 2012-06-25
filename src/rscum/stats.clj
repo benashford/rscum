@@ -7,23 +7,25 @@
       0
       (double (/ (count (intersection a b)) pcount)))))
 
-;; DELETE
-(defn similarity-graph [watching]
-  (loop [[user & users] (keys watching)
-         graph []]
-    (if (nil? users)
-      graph
-      (let [scores (map (fn [other-user] [#{user other-user} (similarity (watching user) (watching other-user))]) users)]
-        (println "USERS count:" (count users))
-        (recur users (concat graph scores))))))
+(defn pair-map [map-f users]
+  (letfn [(outer-f [users]
+    (let [user (first users)]
+      (when-let [other-users (next users)]
+        (letfn [(inner-f [inner-users]
+          (if (empty? inner-users)
+            (outer-f other-users)
+            (let [other-inner-users (rest inner-users)
+                  v (map-f user (first inner-users))]
+              (if-not (nil? v)
+                (lazy-seq (cons v (inner-f other-inner-users)))
+                (recur other-inner-users)))))]
+          (inner-f other-users)))))]
+    (outer-f users)))
 
-;; MAKE PRIVATE
-(defn pairing-users [users map-f filter-f]
-  (time
-    (loop [[user & other-users] users
-           results []]
-      (println "USER:" user "count:" (count other-users) "Results count:" (count results))
-      (if (nil? other-users)
-        results
-        (let [nresults (map (fn [user-b] #{user user-b}) other-users)]
-          (recur other-users (into results (filter filter-f (map map-f nresults)))))))))
+(defn similarity-graph [watching]
+  (into {}
+    (pair-map
+      (fn [user-a user-b]
+        (let [sscore (similarity (watching user-a) (watching user-b))]
+          (if (= sscore 0.0) nil [#{user-a user-b} sscore])))
+      (keys watching))))
