@@ -2,7 +2,9 @@
   (:require [rscum.data :as data])
   (:require [rscum.github :as github])
   (:require [rscum.rank :as rank])
-  (:require [rscum.stats :as stats]))
+  (:require [rscum.stats :as stats])
+  (:use [incanter.core :only [view]])
+  (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text]]))
 
 (defn save-following [username]
   (data/save-following username (github/following-users username)))
@@ -54,3 +56,12 @@
     (map (fn [user-b] [user-b (similarity watching-data user-a user-b)]))
     (filter #(> (second %) 0))
     (sort-by second)))
+
+(defn show-flattened-plots []
+  (let [users (data/load-users)
+        watching (data/load-watching)
+        flattened (stats/reduce-dimensions users watching)
+        plot (scatter-plot (map #(nth % 1) flattened) (map #(nth % 2) flattened))]
+    (doseq [item flattened]
+      (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
+    (view plot)))

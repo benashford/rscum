@@ -44,8 +44,9 @@
   (redis/with-server +redis-server+
     (redis/zcard +ordered-crawl-queue+)))
 
-(defn- load-users []
-  (redis/smembers +crawled-users+))
+(defn load-users []
+  (redis/with-server +redis-server+
+    (redis/smembers +crawled-users+)))
 
 (defn- load-user-following [username]
   (redis/smembers (user-following-key username)))
