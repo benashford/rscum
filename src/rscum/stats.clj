@@ -5,7 +5,7 @@
   (let [pcount (count (union a b))]
     (if (= pcount 0)
       0
-      (double (/ (count (intersection a b)) pcount)))))
+      (Math/sqrt (double (/ (count (intersection a b)) pcount))))))
 
 (defn pair-map [map-f users]
   (letfn [(outer-f [users]
@@ -22,10 +22,19 @@
           (inner-f other-users)))))]
     (outer-f users)))
 
-(defn similarity-graph [watching]
-  (into {}
+(defn- normalize-second [s]
+  (let [seconds (map second s)
+        lowest (apply min seconds)
+        multiplier (/ 1 (- (apply max seconds) lowest))]
+    (map
+      (fn [[k v]]
+        [k (- 1 (* (- v lowest) multiplier))])
+      s)))
+
+(defn similarity-edges [watching]
+  (normalize-second
     (pair-map
       (fn [user-a user-b]
         (let [sscore (similarity (watching user-a) (watching user-b))]
-          (if (= sscore 0.0) nil [#{user-a user-b} sscore])))
+          [#{user-a user-b} sscore]))
       (keys watching))))
