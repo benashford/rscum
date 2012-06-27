@@ -117,3 +117,41 @@
         (<= iterations 0)
         positions
         (recur (reduce-dimensions-iteration positions edge) (dec iterations))))))
+
+;;
+;; k-means clustering
+;;
+(defn- by-centoid [data centoids]
+  (letfn [
+    (do-distance [[_ x y] centoid]
+      (distance [x y] centoid))
+    (find-centoid [point]
+      (println "find-centoid, point:" point "centoids:" centoids)
+      (->>
+        (map (fn [centoid] [(do-distance point centoid) centoid]) centoids)
+        sorted-set
+        first
+        second))]
+    (->>
+      (map
+        (fn [point]
+          #{(find-centoid point) [point]})
+        data)
+      (reduce (comp merge-with concat))
+      (map second))))
+
+(defn- re-centre-centoids [points-by-centoid]
+  (map
+    (fn [points-for-centoid]
+      (let [xes (map #(nth % 1) points-for-centoid)
+            yes (map #(nth % 2) points-for-centoid)]
+        [(/ (reduce + xes) (count xes)) (/ (reduce + yes) (count yes))]))
+    points-by-centoid))
+
+(defn k-means-cluster [data k]
+  (loop [centoids (map (fn [_] [(rand-double -0.5 0.5) (rand-double -0.5 0.5)]) (range k))
+         iterations 15]
+    (let [points-by-centoid (by-centoid data centoids)]
+      (if (<= iterations 0)
+        [centoids points-by-centoid]
+        (recur (re-centre-centoids points-by-centoid) (dec iterations))))))

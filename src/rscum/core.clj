@@ -65,3 +65,9 @@
       (doseq [item flattened]
         (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
       (view plot))))
+
+(defn cluster [k]
+  (time
+    (let [watching (data/load-watching)
+          flattened (stats/reduce-dimensions (keys watching) watching)]
+      (stats/k-means-cluster flattened k))))
