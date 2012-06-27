@@ -38,7 +38,7 @@
         multiplier (/ 1 (- (apply max seconds) lowest))]
     (map
       (fn [[k v]]
-        [k (- 1 (* (- v lowest) multiplier))])
+        [k (- 1 v)]) ;; (* (- v lowest) multiplier))])
       s)))
 
 (defn similarity-edges
@@ -79,16 +79,63 @@
 ;;
 ;; Dimension reduceing
 ;;
+(defn distance [a b]
+  (Math/sqrt
+    (+
+      (Math/pow (- (first a) (first b)) 2)
+      (Math/pow (- (last a) (last b)) 2))))
+
+(defn calc-error-terms [user-distances user-edge]
+  (map
+    (fn [[other-user distance]]
+      (let [real-distance (user-edge other-user)]
+        (case real-distance
+          0.0 distance
+          1.0 0.0
+          (/ (- distance real-distance) real-distance))))
+    user-distances))
+
+(defn calc-grad [position pde]
+  (reduce
+    (fn [x y]
+      (map
+        (fn [idx]
+          (+ (nth x idx) (nth y idx)))
+        (range (count x))))
+    [0.0 0.0]
+    (map
+      (fn [[other-position distance error-term]]
+        (map
+          (fn [x]
+            (* (/ (- (nth position x) (nth other-position x)) distance) error-term))
+          (range 1 3)))
+      pde)))
+
+(defn reduce-dimensions-position-iteration
+  [position positions edge]
+  (let [user (first position)
+        distances (map (fn [other-position] (distance [(nth position 1) (nth position 2)] [(nth other-position 1) (nth other-position 2)])) positions)
+        error-terms (calc-error-terms (zip (map first positions) distances) (partial edge user))
+        grad (calc-grad position (zip positions distances error-terms))
+        move (fn [p gidx] (- p (* 0.01 (nth grad gidx))))]
+      ;;(println "distances:" distances "error-terms:" error-terms)
+    [user (move (nth position 1) 0) (move (nth position 2) 1)]))
+
 (defn reduce-dimensions-iteration
-  "MAKE PRIVATE"
   [positions edge]
-  nil)
+  (map
+    (fn [position]
+      (reduce-dimensions-position-iteration
+        position
+        (filter #(not (= position %)) positions)
+        edge))
+    positions))
 
 (defn reduce-dimensions [users watching]
   (let [initial-positions (zip users (rand-double-seq -10 10) (rand-double-seq -10 10))
         edge (make-similarity-edge watching)]
     (loop [positions initial-positions
-           iterations 0]
+           iterations 10]
       (if
         (<= iterations 0)
         positions

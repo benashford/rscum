@@ -58,10 +58,10 @@
     (sort-by second)))
 
 (defn show-flattened-plots []
-  (let [users (data/load-users)
-        watching (data/load-watching)
-        flattened (stats/reduce-dimensions users watching)
-        plot (scatter-plot (map #(nth % 1) flattened) (map #(nth % 2) flattened))]
-    (doseq [item flattened]
-      (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
-    (view plot)))
+  (time
+    (let [watching (data/load-watching)
+          flattened (stats/reduce-dimensions (keys watching) watching)
+          plot (scatter-plot (map #(nth % 1) flattened) (map #(nth % 2) flattened))]
+      (doseq [item flattened]
+        (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
+      (view plot))))
