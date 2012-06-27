@@ -70,7 +70,7 @@
           (/ (- distance real-distance) real-distance))))
     user-distances))
 
-(defn calc-grad [position pde]
+(defn calc-grad [positions pde]
   (reduce
     (fn [x y]
       (map
@@ -79,21 +79,23 @@
         (range (count x))))
     [0.0 0.0]
     (map
-      (fn [[other-position distance error-term]]
+      (fn [[other-positions distance error-term]]
         (mapv
-          (fn [x]
-            (* (/ (- (nth position x) (nth other-position x)) distance) error-term))
-          (range 1 3)))
+          (fn [[position other-position]]
+            (* (/ (- position other-position) distance) error-term))
+          (zip positions other-positions)))
       pde)))
 
 (defn reduce-dimensions-position-iteration
   "Called once-per-node-per-iteration, returns the new position"
-  [[user pos-x pos-y] positions edge]
-  (let [distances (map (fn [[o-pos-x o-pos-y]] (distance [pos-x pos-y] [o-pos-x o-pos-y])) positions)
-        error-terms (calc-error-terms (zip (map first positions) distances) (partial edge user))
-        grad (calc-grad [pos-x pos-y] (zip positions distances error-terms))
+  [[user pos-x pos-y] full-positions edge]
+  (let [pos [pos-x pos-y]
+        positions (map (fn [[_ x y]] [x y]) full-positions)
+        distances (map (fn [o-pos] (distance pos o-pos)) positions)
+        error-terms (calc-error-terms (zip (map first full-positions) distances) (partial edge user))
+        grad (calc-grad pos (zip positions distances error-terms))
         move (fn [p gidx] (- p (* (/ 1 (count positions)) (nth grad gidx))))]
-      (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad))
+      (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad "distances:" distances "error-terms:" error-terms))
     [user (move pos-x 0) (move pos-y 1)]))
 
 (defn reduce-dimensions-iteration
