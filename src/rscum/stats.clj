@@ -16,9 +16,9 @@
 (defn- normalize-second
   "Normalise the second item in each tuple in a sequence"
   [s]
-  (let [seconds (map second s)
-        lowest (apply min seconds)
-        multiplier (/ 1 (- (apply max seconds) lowest))]
+  (let [seconds (sort (map second s))
+        lowest (first seconds)
+        multiplier (/ 1 (- (last seconds) lowest))]
     (map
       (fn [[k v]]
         [k (- 1 (* (- v lowest) multiplier))])
@@ -66,7 +66,7 @@
     (fn [[other-user distance]]
       (let [real-distance (user-edge other-user)]
         (case real-distance
-          0.0 distance
+          0.0 distance ;; Not sure about thiss
           (/ (- distance real-distance) real-distance))))
     user-distances))
 
@@ -80,25 +80,25 @@
     [0.0 0.0]
     (map
       (fn [[other-position distance error-term]]
-        (map
+        (mapv
           (fn [x]
             (* (/ (- (nth position x) (nth other-position x)) distance) error-term))
           (range 1 3)))
       pde)))
 
 (defn reduce-dimensions-position-iteration
-  [position positions edge]
-  (let [user (first position)
-        distances (map (fn [other-position] (distance [(nth position 1) (nth position 2)] [(nth other-position 1) (nth other-position 2)])) positions)
+  "Called once-per-node-per-iteration, returns the new position"
+  [[user pos-x pos-y] positions edge]
+  (let [distances (map (fn [[o-pos-x o-pos-y]] (distance [pos-x pos-y] [o-pos-x o-pos-y])) positions)
         error-terms (calc-error-terms (zip (map first positions) distances) (partial edge user))
-        grad (calc-grad position (zip positions distances error-terms))
+        grad (calc-grad [pos-x pos-y] (zip positions distances error-terms))
         move (fn [p gidx] (- p (* (/ 1 (count positions)) (nth grad gidx))))]
       (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad))
-    [user (move (nth position 1) 0) (move (nth position 2) 1)]))
+    [user (move pos-x 0) (move pos-y 1)]))
 
 (defn reduce-dimensions-iteration
   [positions edge]
-  (map
+  (pmap
     (fn [position]
       (reduce-dimensions-position-iteration
         position
