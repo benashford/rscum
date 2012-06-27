@@ -132,7 +132,7 @@
     positions))
 
 (defn reduce-dimensions [users watching]
-  (let [initial-positions (zip users (rand-double-seq -10 10) (rand-double-seq -10 10))
+  (let [initial-positions (zip users (rand-double-seq -0.5 0.5) (rand-double-seq -0.5 0.5))
         edge (make-similarity-edge watching)]
     (loop [positions initial-positions
            iterations 10]
