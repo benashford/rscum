@@ -38,7 +38,7 @@
         multiplier (/ 1 (- (apply max seconds) lowest))]
     (map
       (fn [[k v]]
-        [k (- 1 v)]) ;; (* (- v lowest) multiplier))])
+        [k (- 1 (* (- v lowest) multiplier))])
       s)))
 
 (defn similarity-edges
@@ -91,7 +91,6 @@
       (let [real-distance (user-edge other-user)]
         (case real-distance
           0.0 distance
-          1.0 0.0
           (/ (- distance real-distance) real-distance))))
     user-distances))
 
@@ -117,8 +116,8 @@
         distances (map (fn [other-position] (distance [(nth position 1) (nth position 2)] [(nth other-position 1) (nth other-position 2)])) positions)
         error-terms (calc-error-terms (zip (map first positions) distances) (partial edge user))
         grad (calc-grad position (zip positions distances error-terms))
-        move (fn [p gidx] (- p (* 0.01 (nth grad gidx))))]
-      ;;(println "distances:" distances "error-terms:" error-terms)
+        move (fn [p gidx] (- p (* (/ 1 (count positions)) (nth grad gidx))))]
+      (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad))
     [user (move (nth position 1) 0) (move (nth position 2) 1)]))
 
 (defn reduce-dimensions-iteration
@@ -135,7 +134,7 @@
   (let [initial-positions (zip users (rand-double-seq -0.5 0.5) (rand-double-seq -0.5 0.5))
         edge (make-similarity-edge watching)]
     (loop [positions initial-positions
-           iterations 10]
+           iterations 15]
       (if
         (<= iterations 0)
         positions
