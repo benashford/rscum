@@ -10,7 +10,7 @@
   [a b]
   (let [pcount (count (union a b))]
     (if (= pcount 0)
-      0
+      1.0
       (Math/sqrt (double (/ (count (intersection a b)) pcount))))))
 
 (defn- normalize-second
