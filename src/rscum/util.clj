@@ -23,3 +23,12 @@
       (cons
         (map first xs)
         (apply zip (map next xs))))))
+
+(defn flatten-nested [nested]
+  (->>
+    (map
+      (fn [[k v]]
+        ;;(println "flatten-nested map fn, k:" k "v:" v)
+        (map (fn [vi] [k vi]) v))
+      nested)
+    (apply concat)))
