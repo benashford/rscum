@@ -28,11 +28,11 @@
   "The edges of a graph, defined as similarity"
   [watching]
     (normalize-second
-    (pair-map
-      (fn [user-a user-b]
-        (let [sscore (similarity (watching user-a) (watching user-b))]
-          [#{user-a user-b} sscore]))
-      (keys watching))))
+      (pair-map
+        (fn [user-a user-b]
+          (let [sscore (similarity (watching user-a) (watching user-b))]
+            [#{user-a user-b} sscore]))
+        (keys watching))))
 
 (defn- make-similarity-edge [watching]
   (let [edges (into {} (similarity-edges watching))]
