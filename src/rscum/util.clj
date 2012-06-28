@@ -24,6 +24,12 @@
         (map first xs)
         (apply zip (map next xs))))))
 
+(defn rearrange [order s]
+  (map
+    (fn [row]
+      (map #(nth row %) order))
+    s))
+
 (defn flatten-nested [nested]
   (->>
     (map

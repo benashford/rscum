@@ -78,3 +78,12 @@
       (doseq [item flattened]
         (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
       (view plot))))
+
+(defn save-clusters [k]
+  (time
+    (let [watching (data/load-watching)
+          flattened (stats/reduce-dimensions (keys watching) watching)
+          clustered (stats/k-means-cluster flattened k)
+          numbered-clusters (util/rearrange [1 0] (util/zip (map second clustered) (range)))]
+      (doseq [[number elements] numbered-clusters]
+        (data/save-cluster number elements)))))

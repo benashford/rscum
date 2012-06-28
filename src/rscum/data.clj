@@ -84,3 +84,8 @@
   (redis/with-server +redis-server+
     (doseq [username usernames]
       (redis/srem +crawled-users+ username))))
+
+(defn save-cluster [cluster-num elements]
+  (redis/with-server +redis-server+
+    (doseq [element elements]
+      (redis/set (str "user:" (first element) ":cluster") cluster-num))))
