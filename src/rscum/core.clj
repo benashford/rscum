@@ -5,7 +5,8 @@
   (:require [rscum.stats :as stats])
   (:require [rscum.util :as util])
   (:use [incanter.core :only [view]])
-  (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text]]))
+  (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text]])
+  (:use [clojure.stacktrace]))
 
 (defn save-following [username]
   (data/save-following username (github/following-users username)))
@@ -92,9 +93,27 @@
     (doseq [[cluster members] clustered]
       (println "CLUSTER" cluster)
       (println " - members:")
-      (doseq [[ranked-user project]
-                (util/zip
-                  (->> members (map first) (map (fn [user] [user (data/get-rank user)])) (sort-by second) reverse)
-                  (->> members (map first) (map watching) (apply concat) frequencies (sort-by second) reverse))]
-        (println "\tusername:" (first ranked-user) (format "(%f)" (second ranked-user)) "\t\t\t" project))
+      (doseq [
+        line
+          (util/space-columns
+            8
+            (util/zip
+              (->>
+                members
+                (map first)
+                (map (fn [user] [user (data/get-rank user)]))
+                (sort-by second)
+                reverse
+                (map #(apply (partial format "username: %s (%f)") %)))
+              (->>
+                members
+                (map first)
+                (map watching)
+                (apply concat)
+                frequencies
+                (sort-by second)
+                reverse
+                (map #(apply (partial format "repo: %s (%d)") %)))))]
+        (println line))
       (println))))
+

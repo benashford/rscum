@@ -1,4 +1,5 @@
-(ns rscum.util)
+(ns rscum.util
+  (:use [clojure.string :only [trim]]))
 
 (defn pair-map
   "Apply a map function on each pair of users"
@@ -34,7 +35,30 @@
   (->>
     (map
       (fn [[k v]]
-        ;;(println "flatten-nested map fn, k:" k "v:" v)
         (map (fn [vi] [k vi]) v))
       nested)
     (apply concat)))
+
+(defn spaces [n]
+  (apply str (repeat n \space)))
+
+(defn space-columns [min-space rows-raw]
+  (let [
+    rows (map (fn [string] (map str string)) rows-raw)
+    max-width (fn [idx] (apply max (map #(+ (count (nth % idx)) min-space) rows)))
+    max-widths
+      (map
+        (fn [column-idx]
+          (max-width column-idx))
+        (range (count (first rows-raw))))]
+    (map
+      (fn [row]
+        (str
+          (spaces min-space)
+          (trim
+            (apply str
+              (map
+                (fn [[text max-space]]
+                  (str text (spaces (- max-space (count text)))))
+                (zip row max-widths))))))
+      rows)))
