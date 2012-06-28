@@ -68,16 +68,14 @@
         (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
       (view plot))))
 
-(defn cluster [k]
-  (time
-    (let [watching (data/load-watching)
-          flattened (stats/reduce-dimensions (keys watching) watching)
-          clustered (stats/k-means-cluster flattened k)
-          cluster-points (map (fn [[k [_ x y]]] [k x y]) (util/flatten-nested clustered))
-          plot (scatter-plot (map #(nth % 1) cluster-points) (map #(nth % 2) cluster-points) :group-by (map first cluster-points))]
+(defn show-cluster []
+  (let [clustered (data/load-clusters)
+        cluster-points (map (fn [[k [_ x y]]] [k x y]) (util/flatten-nested clustered))
+        plot (scatter-plot (map #(nth % 1) cluster-points) (map #(nth % 2) cluster-points) :group-by (map first cluster-points))]
+    (doseq [flattened (map second clustered)]
       (doseq [item flattened]
-        (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
-      (view plot))))
+        (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw)))
+    (view plot)))
 
 (defn save-clusters [k]
   (time
@@ -86,4 +84,4 @@
           clustered (stats/k-means-cluster flattened k)
           numbered-clusters (util/rearrange [1 0] (util/zip (map second clustered) (range)))]
       (doseq [[number elements] numbered-clusters]
-        (data/save-cluster number elements)))))
+        (data/save-clusters number elements)))))

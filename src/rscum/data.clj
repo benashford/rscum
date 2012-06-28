@@ -19,6 +19,9 @@
 (defn- user-rank-key [username]
   (format "user:%s:rank" username))
 
+(defn- user-info-key [username]
+  (format "user:%s:info" username))
+
 (defn save-following [username following]
   (redis/with-server +redis-server+
     (redis/sadd +crawled-users+ username)
@@ -76,16 +79,33 @@
   (redis/with-server +redis-server+
     (let [users (load-users)
           get-f (fn [user] [user (->> (user-rank-key user) redis/get Double/parseDouble)])]
-      (->> (map get-f users)
-           (sort-by second)
-           reverse))))
+      (->>
+        (map get-f users)
+        (sort-by second)
+        reverse))))
 
 (defn delete-users [usernames]
   (redis/with-server +redis-server+
     (doseq [username usernames]
       (redis/srem +crawled-users+ username))))
 
-(defn save-cluster [cluster-num elements]
+(defn save-clusters [cluster-num elements]
   (redis/with-server +redis-server+
-    (doseq [element elements]
-      (redis/set (str "user:" (first element) ":cluster") cluster-num))))
+    (doseq [[user x y] elements]
+      (redis/hmset
+        (user-info-key user)
+        "cluster" cluster-num
+        "x" x
+        "y" y))))
+
+(defn load-clusters []
+  (redis/with-server +redis-server+
+    (map
+      (fn [[k v]]
+        [k (map (fn [[_ u x y]] [u x y]) v)])
+      (group-by first
+        (map
+          (fn [user]
+            (let [[c x y] (redis/hmget (user-info-key user) "cluster" "x" "y")]
+              [(Integer/parseInt c) user (Double/parseDouble x) (Double/parseDouble y)]))
+          (load-users))))))
