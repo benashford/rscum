@@ -87,10 +87,14 @@
         (data/save-clusters number elements)))))
 
 (defn produce-cluster-information []
-  (let [clustered (sort-by first (data/load-clusters))]
+  (let [clustered (sort-by first (data/load-clusters))
+        watching (data/load-watching)]
     (doseq [[cluster members] clustered]
       (println "CLUSTER" cluster)
       (println " - members:")
-      (doseq [ranked-user (->> (map first members) (map (fn [user] [user (data/get-rank user)])) (sort-by second) reverse)]
-        (println "\tusername:" (first ranked-user) (format "(%f)" (second ranked-user))))
+      (doseq [[ranked-user project]
+                (util/zip
+                  (->> members (map first) (map (fn [user] [user (data/get-rank user)])) (sort-by second) reverse)
+                  (->> members (map first) (map watching) (apply concat) frequencies (sort-by second) reverse))]
+        (println "\tusername:" (first ranked-user) (format "(%f)" (second ranked-user)) "\t\t\t" project))
       (println))))
