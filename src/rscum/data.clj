@@ -84,6 +84,10 @@
         (sort-by second)
         reverse))))
 
+(defn get-rank [user]
+  (redis/with-server +redis-server+
+    (Double/parseDouble (redis/get (user-rank-key user)))))
+
 (defn delete-users [usernames]
   (redis/with-server +redis-server+
     (doseq [username usernames]

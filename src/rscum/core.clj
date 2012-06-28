@@ -85,3 +85,12 @@
           numbered-clusters (util/rearrange [1 0] (util/zip (map second clustered) (range)))]
       (doseq [[number elements] numbered-clusters]
         (data/save-clusters number elements)))))
+
+(defn produce-cluster-information []
+  (let [clustered (sort-by first (data/load-clusters))]
+    (doseq [[cluster members] clustered]
+      (println "CLUSTER" cluster)
+      (println " - members:")
+      (doseq [ranked-user (->> (map first members) (map (fn [user] [user (data/get-rank user)])) (sort-by second) reverse)]
+        (println "\tusername:" (first ranked-user) (format "(%f)" (second ranked-user))))
+      (println))))
