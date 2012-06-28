@@ -60,16 +60,8 @@
     (filter #(> (second %) 0))
     (sort-by second)))
 
-(defn show-flattened-plots []
-  (time
-    (let [watching (data/load-watching)
-          flattened (stats/reduce-dimensions (keys watching) watching)
-          plot (scatter-plot (map #(nth % 1) flattened) (map #(nth % 2) flattened))]
-      (doseq [item flattened]
-        (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw))
-      (view plot))))
-
 (defn show-cluster []
+  "Loads and shows the saved clustered data"
   (let [clustered (data/load-clusters)
         cluster-points (map (fn [[k [_ x y]]] [k x y]) (util/flatten-nested clustered))
         plot (scatter-plot (map #(nth % 1) cluster-points) (map #(nth % 2) cluster-points) :group-by (map first cluster-points))]
@@ -79,6 +71,7 @@
     (view plot)))
 
 (defn save-clusters [k]
+  "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
   (time
     (let [watching (data/load-watching)
           flattened (stats/reduce-dimensions (keys watching) watching)
@@ -88,6 +81,7 @@
         (data/save-clusters number elements)))))
 
 (defn produce-cluster-information []
+  "Prints a list of clusters, their members, and the top watched repos"
   (let [clustered (sort-by first (data/load-clusters))
         watching (data/load-watching)]
     (doseq [[cluster members] clustered]
