@@ -27,7 +27,7 @@
 (defn similarity-edges
   "The edges of a graph, defined as similarity"
   [watching]
-  (normalize-second
+    (normalize-second
     (pair-map
       (fn [user-a user-b]
         (let [sscore (similarity (watching user-a) (watching user-b))]
@@ -95,7 +95,7 @@
         error-terms (calc-error-terms (zip (map first full-positions) distances) (partial edge user))
         grad (calc-grad pos (zip positions distances error-terms))
         move (fn [p gidx] (- p (* (/ 1 (count positions)) (nth grad gidx))))]
-      (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad "distances:" distances "error-terms:" error-terms))
+      (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad))
     [user (move pos-x 0) (move pos-y 1)]))
 
 (defn reduce-dimensions-iteration
