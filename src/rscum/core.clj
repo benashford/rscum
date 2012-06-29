@@ -120,8 +120,8 @@
 
 (defn similarity-histogram
   "Show a histogram of similarity scores, to show suitability of particular function"
-  []
+  [sim-f]
   (let [watching (data/load-watching)
-        edges (stats/similarity-edges watching)
+        edges (stats/similarity-edges sim-f watching)
         scores (filter #(< % 1.0) (map second edges))]
     (view (histogram scores :nbins 100))))
