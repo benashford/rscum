@@ -60,7 +60,7 @@
     (filter #(> (second %) 0))
     (sort-by second)))
 
-(defn show-cluster []
+(defn show-clusters []
   "Loads and shows the saved clustered data"
   (let [clustered (data/load-clusters)
         cluster-points (map (fn [[k [_ x y]]] [k x y]) (util/flatten-nested clustered))
