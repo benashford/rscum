@@ -62,16 +62,19 @@
     (filter #(> (second %) 0))
     (sort-by second)))
 
-(defn show-clusters []
+(defn show-clusters
   "Loads and shows the saved clustered data"
+  []
   (results/show-clusters (data/load-clusters)))
 
-(defn pdf-clusters [filename]
+(defn pdf-clusters
   "Loads and saves as PDF the clustered data"
+  [filename]
   (results/save-clusters (data/load-clusters) filename))
 
-(defn save-clusters [k]
+(defn save-clusters
   "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
+  [k]
   (time
     (let [watching (data/load-watching)
           flattened (stats/reduce-dimensions (keys watching) watching)
