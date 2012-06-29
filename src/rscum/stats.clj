@@ -5,6 +5,9 @@
 ;;
 ;; Similarity scoring - the functions
 ;;
+(defn null-sim [a b]
+  0.95)
+
 (defn set-overlap
   "Calculate the similarity between two sets - 0 being lowest"
   [a b]
@@ -14,12 +17,16 @@
       (Math/sqrt (double (/ (count (intersection a b)) pcount))))))
 
 ;; The default similarity scoring function
-(def similarity set-overlap)
+(def similarity null-sim)
 
 ;;
-;; Similarity scoring - miscellaneous
+;; Similarity scoring - post-processing
 ;;
-(defn- normalize-second
+(defn null-pp
+  [s]
+  s)
+
+(defn normalize-second
   "Normalise the second item in each tuple in a sequence"
   [s]
   (let [seconds (sort (map second s))
@@ -30,19 +37,23 @@
         [k (- 1 (* (- v lowest) multiplier))])
       s)))
 
+(def post-process null-pp)
+
 (defn similarity-edges
   "The edges of a graph, defined as similarity"
   ([watching]
-    (similarity-edges similarity watching))
-  ([sim-f watching]
-    (normalize-second
+    (similarity-edges similarity post-process watching))
+  ([sim-f post-f watching]
+    (post-f
       (pair-map
         (fn [user-a user-b]
           (let [sscore (sim-f (watching user-a) (watching user-b))]
             [#{user-a user-b} sscore]))
         (keys watching)))))
 
-(defn- make-similarity-edge [watching]
+(defn- make-similarity-edge
+  "For a given map of watched repos, produce a function that returns the similarity score between two users"
+  [watching]
   (let [edges (into {} (similarity-edges watching))]
     (fn [a b]
       (edges #{a b}))))
