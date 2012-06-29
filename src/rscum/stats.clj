@@ -9,7 +9,7 @@
   0.5)
 
 (defn set-overlap
-  "Calculate the similarity between two sets - 0 being lowest"
+  "Calculate the Jaccard Index between two sets - 0 being lowest"
   [a b]
   (let [pcount (count (union a b))]
     (if (= pcount 0)
