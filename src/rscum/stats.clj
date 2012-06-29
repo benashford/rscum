@@ -27,7 +27,7 @@
 
 (defn tanimoto [a b]
   (let [so (- 1 (set-overlap a b))]
-    (if (= 0.0 so) 10.0 (* -1 (log2 so)))))
+    (if (= 0.0 so) 6.66 (* -1 (log2 so)))))
 
 ;; The default similarity scoring function
 (def similarity tanimoto)
