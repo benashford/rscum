@@ -1,6 +1,9 @@
 TODO
 
 - Test different similarity functions
+  - Dice's coefficient (http://en.wikipedia.org/wiki/Dice%27s_coefficient)
+  - Overlap coefficient (http://en.wikipedia.org/wiki/Overlap_coefficient)
+  - Sorensen similarity index (http://en.wikipedia.org/wiki/S%C3%B8rensen_similarity_index)
 - Test different "normalisation" methods
 - Investigate the damping of the dimension flattening
 - Consider a "distance from centre score" (those at centre are likely to be Jack-of-all-Trades, those at edge aren't interested in anything...)
