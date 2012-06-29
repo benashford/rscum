@@ -149,8 +149,7 @@
 
 (defn k-means-cluster [data k]
   (loop [centoids (map (fn [_] [(rand-double -0.5 0.5) (rand-double -0.5 0.5)]) (range k))
-         iterations 100]
-    (println "iteration:" iterations "centoids:" centoids)
+         iterations 50]
     (let [points-by-centoid (by-centoid data centoids)]
       (if (<= iterations 0)
         points-by-centoid
