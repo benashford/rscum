@@ -4,6 +4,10 @@
   (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text]])
   (:use [incanter.pdf :only [save-pdf]]))
 
+;;
+;; GRAPHS
+;;
+
 (defn- make-clusters [clustered]
   (let [cluster-points (map (fn [[k [_ x y]]] [k x y]) (util/flatten-nested clustered))
     plot (scatter-plot
@@ -25,3 +29,36 @@
 (defn save-clusters [clustered filename]
   (let [plot (make-clusters clustered)]
     (save-pdf plot filename :height 2000 :width 2000)))
+
+;;
+;; TEXT
+;;
+
+(defn produce-cluster-information [clustered watching ranks]
+  "Prints a list of clusters, their members, and the top watched repos"
+  (doseq [[cluster members] clustered]
+    (println "CLUSTER" cluster)
+    (println " - members:")
+    (doseq [
+      line
+        (util/space-columns
+          8
+          (util/zip
+            (->>
+              members
+              (map first)
+              (map (fn [user] [user (ranks user)]))
+              (sort-by second)
+              reverse
+              (map #(apply (partial format "username: %s (%f)") %)))
+            (->>
+              members
+              (map first)
+              (map watching)
+              (apply concat)
+              frequencies
+              (sort-by second)
+              reverse
+              (map #(apply (partial format "repo: %s (%d)") %)))))]
+      (println line))
+    (println)))

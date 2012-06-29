@@ -79,34 +79,8 @@
       (doseq [[number elements] numbered-clusters]
         (data/save-clusters number elements)))))
 
-(defn produce-cluster-information []
-  "Prints a list of clusters, their members, and the top watched repos"
-  (let [clustered (sort-by first (data/load-clusters))
-        watching (data/load-watching)]
-    (doseq [[cluster members] clustered]
-      (println "CLUSTER" cluster)
-      (println " - members:")
-      (doseq [
-        line
-          (util/space-columns
-            8
-            (util/zip
-              (->>
-                members
-                (map first)
-                (map (fn [user] [user (data/get-rank user)]))
-                (sort-by second)
-                reverse
-                (map #(apply (partial format "username: %s (%f)") %)))
-              (->>
-                members
-                (map first)
-                (map watching)
-                (apply concat)
-                frequencies
-                (sort-by second)
-                reverse
-                (map #(apply (partial format "repo: %s (%d)") %)))))]
-        (println line))
-      (println))))
-
+(defn print-clusters []
+  (results/produce-cluster-information
+    (sort-by first (data/load-clusters))
+    (data/load-watching)
+    data/get-rank))
