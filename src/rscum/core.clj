@@ -2,10 +2,12 @@
   (:require [rscum.data :as data])
   (:require [rscum.github :as github])
   (:require [rscum.rank :as rank])
+  (:require [rscum.results :as results])
   (:require [rscum.stats :as stats])
   (:require [rscum.util :as util])
   (:use [incanter.core :only [view]])
   (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text]])
+  (:use [clojure.java.io])
   (:use [clojure.stacktrace]))
 
 (defn save-following [username]
@@ -62,20 +64,11 @@
 
 (defn show-clusters []
   "Loads and shows the saved clustered data"
-  (let [clustered (data/load-clusters)
-        cluster-points (map (fn [[k [_ x y]]] [k x y]) (util/flatten-nested clustered))
-        plot
-          (scatter-plot
-            (map #(nth % 1) cluster-points)
-            (map #(nth % 2) cluster-points)
-            :group-by (map first cluster-points)
-            :title "Similar GitHub users"
-            :x-label "x"
-            :y-label "y")]
-    (doseq [flattened (map second clustered)]
-      (doseq [item flattened]
-        (add-pointer plot (nth item 1) (nth item 2) :text (nth item 0) :angle :sw)))
-    (view plot)))
+  (results/show-clusters (data/load-clusters)))
+
+(defn pdf-clusters [filename]
+  "Loads and saves as PDF the clustered data"
+  (results/save-clusters (data/load-clusters) filename))
 
 (defn save-clusters [k]
   "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
@@ -87,36 +80,30 @@
       (doseq [[number elements] numbered-clusters]
         (data/save-clusters number elements)))))
 
-(defn produce-cluster-information []
-  "Prints a list of clusters, their members, and the top watched repos"
-  (let [clustered (sort-by first (data/load-clusters))
-        watching (data/load-watching)]
-    (doseq [[cluster members] clustered]
-      (println "CLUSTER" cluster)
-      (println " - members:")
-      (doseq [
-        line
-          (util/space-columns
-            8
-            (util/zip
-              (->>
-                members
-                (map first)
-                (map (fn [user] [user (data/get-rank user)]))
-                (sort-by second)
-                reverse
-                (map #(apply (partial format "username: %s (%f)") %)))
-              (->>
-                members
-                (map first)
-                (map watching)
-                (apply concat)
-                frequencies
-                (sort-by second)
-                reverse
-                (map #(apply (partial format "repo: %s (%d)") %)))))]
-        (println line))
-      (println))))
+(defn print-cluster-report
+  ([]
+    (results/produce-cluster-information
+      (sort-by first (data/load-clusters))
+      (data/load-watching)
+      data/get-rank
+      println))
+  ([cluster]
+    (results/produce-cluster-information
+      (filter #(= (first %) cluster) (data/load-clusters))
+      (data/load-watching)
+      data/get-rank
+      println)))
+
+(defn show-details [username]
+  (data/load-user username))
+
+(defn save-cluster-report [filename]
+  (with-open [wrtr (writer filename)]
+    (results/produce-cluster-information
+      (sort-by first (data/load-clusters))
+      (data/load-watching)
+      data/get-rank
+      (fn [line] (.write wrtr (str line \newline))))))
 
 (defn similarity-histogram
   "Show a histogram of similarity scores, to show suitability of particular function"

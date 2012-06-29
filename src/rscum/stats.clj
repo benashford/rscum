@@ -112,10 +112,11 @@
         positions (map (fn [[_ x y]] [x y]) full-positions)
         distances (map (fn [o-pos] (distance pos o-pos)) positions)
         error-terms (calc-error-terms (zip (map first full-positions) distances) (partial edge user))
+        total-error-term (->> error-terms (map #(Math/abs %)) (reduce +))
         grad (calc-grad pos (zip positions distances error-terms))
         move (fn [p gidx] (- p (* (/ 1 (count positions)) (nth grad gidx))))]
-      (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad))
-    [user (move pos-x 0) (move pos-y 1)]))
+    ;;(if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad "distances:" distances "error-terms:" error-terms))
+    [user (move pos-x 0) (move pos-y 1) total-error-term]))
 
 (defn reduce-dimensions-iteration
   [positions edge]
@@ -135,7 +136,9 @@
       (if
         (<= iterations 0)
         positions
-        (recur (reduce-dimensions-iteration positions edge) (dec iterations))))))
+        (let [next-positions-with-errors (reduce-dimensions-iteration positions edge)]
+          (println "TOTAL error, iteration:" iterations "=" (reduce + (map #(nth % 3) next-positions-with-errors)))
+          (recur (map (fn [[a b c _]] [a b c]) next-positions-with-errors) (dec iterations)))))))
 
 ;;
 ;; k-means clustering
@@ -154,7 +157,9 @@
         second))]
     (->>
       (map (fn [point] {(find-centoid point) [point]}) data)
-      (reduce (partial merge-with concat) {}))))
+      (reduce
+        (partial merge-with concat)
+        (reduce (fn [h k] (assoc h k [])) {} centoids)))))
 
 (defn- re-centre-centoids [points-by-centoid]
   {:pre [(> (count points-by-centoid) 0)]
@@ -162,14 +167,17 @@
   (map
     (fn [points-for-centoid]
       (let [xes (map #(nth % 1) points-for-centoid)
-            yes (map #(nth % 2) points-for-centoid)]
-        [(/ (reduce + xes) (count xes)) (/ (reduce + yes) (count yes))]))
+            yes (map #(nth % 2) points-for-centoid)
+            x-count (count xes)
+            y-count (count yes)
+            new-x (if (= x-count 0) (rand-double -0.5 0.5) (/ (reduce + xes) x-count))
+            new-y (if (= y-count 0) (rand-double -0.5 0.5) (/ (reduce + yes) y-count))]
+        [new-x new-y]))
     points-by-centoid))
 
 (defn k-means-cluster [data k]
   (loop [centoids (map (fn [_] [(rand-double -0.5 0.5) (rand-double -0.5 0.5)]) (range k))
-         iterations 100]
-    (println "iteration:" iterations "centoids:" centoids)
+         iterations 50]
     (let [points-by-centoid (by-centoid data centoids)]
       (if (<= iterations 0)
         points-by-centoid
