@@ -3,6 +3,13 @@
   (:use [rscum.util]))
 
 ;;
+;; Miscellaneous
+;;
+
+(defn- log2 [x]
+  (/ (Math/log x) (Math/log 2)))
+
+;;
 ;; Similarity scoring - the functions
 ;;
 (defn null-sim [a b]
@@ -11,21 +18,27 @@
 (defn set-overlap
   "Calculate the Jaccard Index between two sets - 0 being lowest"
   [a b]
-  (let [pcount (count (union a b))]
-    (if (= pcount 0)
-      0
-      (Math/sqrt (double (/ (count (intersection a b)) pcount))))))
+  (-
+    1
+    (let [pcount (count (union a b))]
+      (if (= pcount 0)
+        0.0
+        (Math/sqrt (double (/ (count (intersection a b)) pcount)))))))
+
+(defn tanimoto [a b]
+  (let [so (- 1 (set-overlap a b))]
+    (if (= 0.0 so) 10.0 (* -1 (log2 so)))))
 
 ;; The default similarity scoring function
-(def similarity set-overlap)
+(def similarity tanimoto)
 
 ;;
 ;; Similarity scoring - post-processing
 ;;
 (defn null-pp [s]
-  (map (fn [[k v]] [k (- 1 v)]) s))
+  s)
 
-(defn normalize-second
+(defn normalise-second
   "Normalise the second item in each tuple in a sequence"
   [s]
   (let [seconds (sort (map second s))
@@ -33,10 +46,10 @@
         multiplier (/ 1 (- (last seconds) lowest))]
     (map
       (fn [[k v]]
-        [k (- 1 (* (- v lowest) multiplier))])
+        [k (* (- v lowest) multiplier)])
       s)))
 
-(def post-process null-pp)
+(def post-process normalise-second)
 
 (defn similarity-edges
   "The edges of a graph, defined as similarity"
