@@ -65,6 +65,10 @@
   "Loads and shows the saved clustered data"
   (results/show-clusters (data/load-clusters)))
 
+(defn pdf-clusters [filename]
+  "Loads and saves as PDF the clustered data"
+  (results/save-clusters (data/load-clusters) filename))
+
 (defn save-clusters [k]
   "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
   (time
