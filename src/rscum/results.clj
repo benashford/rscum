@@ -1,7 +1,7 @@
 (ns rscum.results
   (:require [rscum.util :as util])
   (:use [incanter.core :only [view]])
-  (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text]])
+  (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text set-x-range]])
   (:use [incanter.pdf :only [save-pdf]]))
 
 ;;
@@ -30,9 +30,17 @@
   (let [plot (make-clusters clustered)]
     (save-pdf plot filename :height 2000 :width 2000)))
 
+(defn- make-similarity-histogram [edges]
+  (let [scores (filter #(< % 1.0) (map second edges))
+        chart (histogram scores :nbins 100)]
+    (set-x-range chart 0.0 1.0)
+    chart))
+
 (defn show-similarity-histogram [edges]
-  (let [scores (filter #(< % 1.0) (map second edges))]
-    (view (histogram scores :nbins 100))))
+  (view (make-similarity-histogram edges)))
+
+(defn save-similarity-histogram [edges filename]
+  (save-pdf (make-similarity-histogram edges) filename :height 1000 :width 2000))
 
 ;;
 ;; TEXT

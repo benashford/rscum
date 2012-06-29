@@ -79,6 +79,12 @@
         edges (stats/similarity-edges sim-f post-f watching)]
     (results/show-similarity-histogram edges)))
 
+(defn pdf-similarity-histogram
+  [sim-f post-f filename]
+  (let [watching (data/load-watching)
+        edges (stats/similarity-edges sim-f post-f watching)]
+    (results/save-similarity-histogram edges filename)))
+
 (defn save-clusters
   "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
   [k]
