@@ -80,12 +80,19 @@
       (doseq [[number elements] numbered-clusters]
         (data/save-clusters number elements)))))
 
-(defn print-cluster-report []
-  (results/produce-cluster-information
-    (sort-by first (data/load-clusters))
-    (data/load-watching)
-    data/get-rank
-    println))
+(defn print-cluster-report
+  ([]
+    (results/produce-cluster-information
+      (sort-by first (data/load-clusters))
+      (data/load-watching)
+      data/get-rank
+      println))
+  ([cluster]
+    (results/produce-cluster-information
+      (filter #(= (first %) cluster) (data/load-clusters))
+      (data/load-watching)
+      data/get-rank
+      println)))
 
 (defn show-details [username]
   (data/load-user username))
