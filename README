@@ -1,15 +1,6 @@
-# rscum
+# Getting started:
 
-FIXME: write description
-
-## Usage
-
-FIXME: write
-
-## License
-
-TBD
-
-## Miscellaneous
-
-Mind the formatting caused by bizarre editor preferences
+1) Install Leiningen (https://github.com/technomancy/leiningen/)
+2) Install Redis (http://redis.io/)
+3) Type: lein repl
+4) Have a look at core.clj to see what top-level functions there are
