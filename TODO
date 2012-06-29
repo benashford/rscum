@@ -3,3 +3,4 @@ TODO
 - Test different similarity functions
 - Test different "normalisation" methods
 - Investigate the damping of the dimension flattening
+- Consider a "distance from centre score" (those at centre are likely to be Jack-of-all-Trades, those at edge aren't interested in anything...)
