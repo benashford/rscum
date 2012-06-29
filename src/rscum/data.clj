@@ -118,6 +118,6 @@
   (redis/with-server +redis-server+
     (let [uik (user-info-key username)]
       {:rank (get-rank username)
-       :cluster (redis/hget uik "cluster")
-       :x (redis/hget uik "x")
-       :y (redis/hget uik "y")})))
+       :cluster (Integer/parseInt (redis/hget uik "cluster"))
+       :x (Double/parseDouble (redis/hget uik "x"))
+       :y (Double/parseDouble (redis/hget uik "y"))})))
