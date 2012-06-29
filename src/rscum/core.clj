@@ -118,3 +118,8 @@
         (println line))
       (println))))
 
+(defn similarity-histogram
+  "Show a histogram of similarity scores, to show suitability of particular function"
+  []
+  (let [watching (data/load-watching)]
+    (println watching)))

@@ -3,9 +3,9 @@
   (:use [rscum.util]))
 
 ;;
-;; Similarity scoring
+;; Similarity scoring - the functions
 ;;
-(defn similarity
+(defn set-overlap
   "Calculate the similarity between two sets - 0 being lowest"
   [a b]
   (let [pcount (count (union a b))]
@@ -13,6 +13,12 @@
       0
       (Math/sqrt (double (/ (count (intersection a b)) pcount))))))
 
+;; The default similarity scoring function
+(def similarity set-overlap)
+
+;;
+;; Similarity scoring - miscellaneous
+;;
 (defn- normalize-second
   "Normalise the second item in each tuple in a sequence"
   [s]
@@ -26,13 +32,15 @@
 
 (defn similarity-edges
   "The edges of a graph, defined as similarity"
-  [watching]
+  ([watching]
+    (similarity-edges similarity watching))
+  ([sim-f watching]
     (normalize-second
       (pair-map
         (fn [user-a user-b]
-          (let [sscore (similarity (watching user-a) (watching user-b))]
+          (let [sscore (sim-f (watching user-a) (watching user-b))]
             [#{user-a user-b} sscore]))
-        (keys watching))))
+        (keys watching)))))
 
 (defn- make-similarity-edge [watching]
   (let [edges (into {} (similarity-edges watching))]
