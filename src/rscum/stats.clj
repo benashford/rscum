@@ -93,10 +93,11 @@
         positions (map (fn [[_ x y]] [x y]) full-positions)
         distances (map (fn [o-pos] (distance pos o-pos)) positions)
         error-terms (calc-error-terms (zip (map first full-positions) distances) (partial edge user))
+        total-error-term (->> error-terms (map #(Math/abs %)) (reduce +))
         grad (calc-grad pos (zip positions distances error-terms))
         move (fn [p gidx] (- p (* (/ 1 (count positions)) (nth grad gidx))))]
-      (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad "distances:" distances "error-terms:" error-terms))
-    [user (move pos-x 0) (move pos-y 1)]))
+    (if (some #(> (Math/abs %) 1000) grad) (println "grad:" grad "distances:" distances "error-terms:" error-terms))
+    [user (move pos-x 0) (move pos-y 1) total-error-term]))
 
 (defn reduce-dimensions-iteration
   [positions edge]
@@ -116,7 +117,9 @@
       (if
         (<= iterations 0)
         positions
-        (recur (reduce-dimensions-iteration positions edge) (dec iterations))))))
+        (let [next-positions-with-errors (reduce-dimensions-iteration positions edge)]
+          (println "TOTAL error, iteration:" iterations "=" (reduce + (map #(nth % 3) next-positions-with-errors)))
+          (recur (map (fn [[a b c _]] [a b c]) next-positions-with-errors) (dec iterations)))))))
 
 ;;
 ;; k-means clustering
