@@ -72,6 +72,14 @@
   [filename]
   (results/save-clusters (data/load-clusters) filename))
 
+(defn similarity-histogram
+  "Show a histogram of similarity scores, to show suitability of particular function"
+  [sim-f post-f]
+  (let [watching (data/load-watching)
+        edges (stats/similarity-edges sim-f post-f watching)
+        scores (filter #(< % 1.0) (map second edges))]
+    (view (histogram scores :nbins 100))))
+
 (defn save-clusters
   "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
   [k]
@@ -107,11 +115,3 @@
       (data/load-watching)
       data/get-rank
       (fn [line] (.write wrtr (str line \newline))))))
-
-(defn similarity-histogram
-  "Show a histogram of similarity scores, to show suitability of particular function"
-  [sim-f post-f]
-  (let [watching (data/load-watching)
-        edges (stats/similarity-edges sim-f post-f watching)
-        scores (filter #(< % 1.0) (map second edges))]
-    (view (histogram scores :nbins 100))))
