@@ -7,6 +7,7 @@
   (:require [rscum.util :as util])
   (:use [incanter.core :only [view]])
   (:use [incanter.charts :only [scatter-plot histogram add-pointer add-text]])
+  (:use [clojure.java.io])
   (:use [clojure.stacktrace]))
 
 (defn save-following [username]
@@ -79,8 +80,17 @@
       (doseq [[number elements] numbered-clusters]
         (data/save-clusters number elements)))))
 
-(defn print-clusters []
+(defn print-cluster-report []
   (results/produce-cluster-information
     (sort-by first (data/load-clusters))
     (data/load-watching)
-    data/get-rank))
+    data/get-rank
+    println))
+
+(defn save-cluster-report [filename]
+  (with-open [wrtr (writer filename)]
+    (results/produce-cluster-information
+      (sort-by first (data/load-clusters))
+      (data/load-watching)
+      data/get-rank
+      (fn [line] (.write wrtr (str line \newline))))))

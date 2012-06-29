@@ -34,11 +34,11 @@
 ;; TEXT
 ;;
 
-(defn produce-cluster-information [clustered watching ranks]
+(defn produce-cluster-information [clustered watching ranks callback-f]
   "Prints a list of clusters, their members, and the top watched repos"
   (doseq [[cluster members] clustered]
-    (println "CLUSTER" cluster)
-    (println " - members:")
+    (callback-f (str "CLUSTER " cluster))
+    (callback-f " - members:")
     (doseq [
       line
         (util/space-columns
@@ -60,5 +60,5 @@
               (sort-by second)
               reverse
               (map #(apply (partial format "repo: %s (%d)") %)))))]
-      (println line))
-    (println)))
+      (callback-f line))
+    (callback-f "")))
