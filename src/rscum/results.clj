@@ -30,6 +30,10 @@
   (let [plot (make-clusters clustered)]
     (save-pdf plot filename :height 2000 :width 2000)))
 
+(defn show-similarity-histogram [edges]
+  (let [scores (filter #(< % 1.0) (map second edges))]
+    (view (histogram scores :nbins 100))))
+
 ;;
 ;; TEXT
 ;;

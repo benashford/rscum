@@ -76,9 +76,8 @@
   "Show a histogram of similarity scores, to show suitability of particular function"
   [sim-f post-f]
   (let [watching (data/load-watching)
-        edges (stats/similarity-edges sim-f post-f watching)
-        scores (filter #(< % 1.0) (map second edges))]
-    (view (histogram scores :nbins 100))))
+        edges (stats/similarity-edges sim-f post-f watching)]
+    (results/show-similarity-histogram edges)))
 
 (defn save-clusters
   "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
