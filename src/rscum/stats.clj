@@ -6,7 +6,7 @@
 ;; Similarity scoring - the functions
 ;;
 (defn null-sim [a b]
-  0.95)
+  0.5)
 
 (defn set-overlap
   "Calculate the similarity between two sets - 0 being lowest"
