@@ -25,12 +25,12 @@
         0.0
         (Math/sqrt (double (/ (count (intersection a b)) pcount)))))))
 
-(defn tanimoto [a b]
+(defn tanimoto [ff a b]
   (let [so (- 1 (set-overlap a b))]
-    (if (= 0.0 so) 6.66 (* -1 (log2 so)))))
+    (if (= 0.0 so) ff (* -1 (log2 so)))))
 
 ;; The default similarity scoring function
-(def similarity tanimoto)
+(def similarity (partial tanimoto 10.0))
 
 ;;
 ;; Similarity scoring - post-processing
