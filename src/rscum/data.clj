@@ -113,3 +113,11 @@
             (let [[c x y] (redis/hmget (user-info-key user) "cluster" "x" "y")]
               [(Integer/parseInt c) user (Double/parseDouble x) (Double/parseDouble y)]))
           (load-users))))))
+
+(defn load-user [username]
+  (redis/with-server +redis-server+
+    (let [uik (user-info-key username)]
+      {:rank (get-rank username)
+       :cluster (redis/hget uik "cluster")
+       :x (redis/hget uik "x")
+       :y (redis/hget uik "y")})))

@@ -87,6 +87,9 @@
     data/get-rank
     println))
 
+(defn show-details [username]
+  (data/load-user username))
+
 (defn save-cluster-report [filename]
   (with-open [wrtr (writer filename)]
     (results/produce-cluster-information
