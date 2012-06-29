@@ -67,9 +67,10 @@
             (map watching)
             (apply concat)
             frequencies
+            (map (fn [[repo watchers]] [repo (* 100.0 (double (/ watchers (count members))))]))
             (sort-by second)
             reverse
-            (map #(apply (partial format "repo: %s (%d)") %)))))]
+            (map #(apply (partial format "repo: %s (%.1f%%)") %)))))]
     (callback-f line)))
 
 (defn produce-cluster-information [clustered watching ranks callback-f]
