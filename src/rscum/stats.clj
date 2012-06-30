@@ -45,7 +45,7 @@
   (proto-tanimoto dice ff a b))
 
 ;; The default similarity scoring function
-(def similarity (partial dice-tanimoto 12.5))
+(def similarity null-sim);;(partial dice-tanimoto 12.5))
 
 ;;
 ;; Similarity scoring - post-processing
@@ -64,7 +64,7 @@
         [k (* (- v lowest) multiplier)])
       s)))
 
-(def post-process normalise-second)
+(def post-process null-pp)
 
 (defn similarity-edges
   "The edges of a graph, defined as similarity"
@@ -102,7 +102,7 @@
 ;; Dimension reduceing
 ;;
 
-(defn distance [a b]
+(defn euclidian-distance [a b]
   (Math/hypot
     (- (first a) (first b))
     (- (last a) (last b))))
@@ -138,7 +138,7 @@
   {:pre [(> (count full-positions) 0)]}
   (let [pos [pos-x pos-y]
         positions (map (fn [[_ x y]] [x y]) full-positions)
-        distances (map (fn [o-pos] (distance pos o-pos)) positions)
+        distances (map (fn [o-pos] (euclidian-distance pos o-pos)) positions)
         error-terms (calc-error-terms (zip (map first full-positions) distances) (partial edge user))
         total-error-term (->> error-terms (map #(Math/abs %)) (reduce +))
         grad (calc-grad pos (zip positions distances error-terms))
@@ -183,15 +183,13 @@
 
 ;; k-means clustering
 ;;
-(defn- by-centoid [data centoids]
+(defn- by-centoid [distance-f data centoids]
   {:pre [(> (count centoids) 0)]
    :post [(= (count %) (count centoids))]}
   (letfn [
-    (do-distance [[_ x y] centoid]
-      (distance [x y] centoid))
     (find-centoid [point]
       (->>
-        (map (fn [centoid] [(do-distance point centoid) centoid]) centoids)
+        (map (fn [centoid] [(distance-f point centoid) centoid]) centoids)
         (sort-by first)
         first
         second))]
@@ -200,6 +198,8 @@
       (reduce
         (partial merge-with concat)
         (reduce (fn [h k] (assoc h k [])) {} centoids)))))
+
+(def euclidian-by-centoid (partial by-centoid (fn [[_ x y] centoid] (euclidian-distance [x y] centoid))))
 
 (defn- re-centre-centoids [points-by-centoid]
   {:pre [(> (count points-by-centoid) 0)]
@@ -218,7 +218,7 @@
 (defn k-means-cluster [data k]
   (loop [centoids (map (fn [_] [(rand-double -0.5 0.5) (rand-double -0.5 0.5)]) (range k))
          iterations 50]
-    (let [points-by-centoid (by-centoid data centoids)]
+    (let [points-by-centoid (euclidian-by-centoid data centoids)]
       (if (<= iterations 0)
         points-by-centoid
         (recur (re-centre-centoids (map second points-by-centoid)) (dec iterations))))))
@@ -234,4 +234,4 @@
           {(int (Math/floor (/ (+ (Math/atan2 x y) Math/PI) angle-per-cluster))) [point]}))
       (reduce (partial merge-with concat) {}))))
 
-(def cluster angular-cluster)
+(def cluster k-means-cluster)
