@@ -91,7 +91,7 @@
   (time
     (let [watching (data/load-watching)
           flattened (stats/reduce-dimensions (keys watching) watching)
-          clustered (stats/k-means-cluster flattened k)
+          clustered (stats/cluster flattened k)
           numbered-clusters (util/rearrange [1 0] (util/zip (map second clustered) (range)))]
       (doseq [[number elements] numbered-clusters]
         (data/save-clusters number elements)))))

@@ -194,3 +194,5 @@
       (if (<= iterations 0)
         points-by-centoid
         (recur (re-centre-centoids (map second points-by-centoid)) (dec iterations))))))
+
+(def cluster k-means-cluster)
