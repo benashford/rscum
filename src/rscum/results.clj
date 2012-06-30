@@ -47,31 +47,32 @@
 ;;
 
 (defn produce-one-cluster-information [cluster members watching ranks callback-f]
-  (callback-f (str "CLUSTER " cluster))
-  (callback-f " - members:")
-  (doseq [
-    line
-      (util/space-columns
-        8
-        (util/zip
-          (->>
-            members
-            (map first)
-            (map (fn [user] [user (ranks user)]))
-            (sort-by second)
-            reverse
-            (map #(apply (partial format "username: %s (%f)") %)))
-          (->>
-            members
-            (map first)
-            (map watching)
-            (apply concat)
-            frequencies
-            (map (fn [[repo watchers]] [repo (* 100.0 (double (/ watchers (count members))))]))
-            (sort-by second)
-            reverse
-            (map #(apply (partial format "repo: %s (%.1f%%)") %)))))]
-    (callback-f line)))
+  (let [distance-from-centre (into {} (map (fn [[u x y]] [u (Math/hypot x y)]) members))]
+    (callback-f (str "CLUSTER " cluster))
+    (callback-f " - members:")
+    (doseq [
+      line
+        (util/space-columns
+          8
+          (util/zip
+            (->>
+              members
+              (map first)
+              (map (fn [user] [user (ranks user) (distance-from-centre user)]))
+              (sort-by second)
+              reverse
+              (map #(apply (partial format "username: %s (rank: %f, distance: %f)") %)))
+            (->>
+              members
+              (map first)
+              (map watching)
+              (apply concat)
+              frequencies
+              (map (fn [[repo watchers]] [repo (* 100.0 (double (/ watchers (count members))))]))
+              (sort-by second)
+              reverse
+              (map #(apply (partial format "repo: %s (%.1f%%)") %)))))]
+      (callback-f line))))
 
 (defn produce-cluster-information [clustered watching ranks callback-f]
   "Prints a list of clusters, their members, and the top watched repos"
