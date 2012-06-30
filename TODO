@@ -4,3 +4,4 @@ TODO
   - Overlap coefficient (http://en.wikipedia.org/wiki/Overlap_coefficient)
 - Test different "normalisation" methods
 - Investigate the damping of the dimension flattening
+- Nearest neighbours for a particular user
