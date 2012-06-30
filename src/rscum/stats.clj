@@ -159,13 +159,23 @@
   (let [initial-positions (zip users (rand-double-seq -0.5 0.5) (rand-double-seq -0.5 0.5))
         edge (make-similarity-edge watching)]
     (loop [positions initial-positions
-           iterations 15]
+           iterations 100
+           previous-total-error Integer/MAX_VALUE]
       (if
         (<= iterations 0)
         positions
-        (let [next-positions-with-errors (reduce-dimensions-iteration positions edge)]
-          (println "TOTAL error, iteration:" iterations "=" (reduce + (map #(nth % 3) next-positions-with-errors)))
-          (recur (map (fn [[a b c _]] [a b c]) next-positions-with-errors) (dec iterations)))))))
+        (let [next-positions-with-errors (reduce-dimensions-iteration positions edge)
+              total-error (reduce + (map #(nth % 3) next-positions-with-errors))
+              delta-error (- total-error previous-total-error)]
+          (if
+            (> delta-error -1.0)
+            positions
+            (do
+              (println "Iteration:" iterations "TOTAL ERROR:" total-error "delta:" delta-error)
+              (recur
+                (map (fn [[a b c _]] [a b c]) next-positions-with-errors)
+                (dec iterations)
+                total-error))))))))
 
 ;;
 ;; CLUSTERING
