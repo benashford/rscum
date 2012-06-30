@@ -86,11 +86,11 @@
 ;;
 ;; Dimension reduceing
 ;;
+
 (defn distance [a b]
-  (Math/sqrt
-    (+
-      (Math/pow (- (first a) (first b)) 2)
-      (Math/pow (- (last a) (last b)) 2))))
+  (Math/hypot
+    (- (first a) (first b))
+    (- (last a) (last b))))
 
 (defn calc-error-terms [user-distances user-edge]
   (map
