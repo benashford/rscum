@@ -160,7 +160,7 @@
         edge (make-similarity-edge watching)]
     (loop [positions initial-positions
            iterations 100
-           previous-total-error Integer/MAX_VALUE]
+           previous-total-error Double/MAX_VALUE]
       (if
         (<= iterations 0)
         positions
