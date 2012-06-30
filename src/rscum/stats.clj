@@ -153,6 +153,9 @@
           (recur (map (fn [[a b c _]] [a b c]) next-positions-with-errors) (dec iterations)))))))
 
 ;;
+;; CLUSTERING
+;;
+
 ;; k-means clustering
 ;;
 (defn- by-centoid [data centoids]
@@ -194,5 +197,16 @@
       (if (<= iterations 0)
         points-by-centoid
         (recur (re-centre-centoids (map second points-by-centoid)) (dec iterations))))))
+
+;; Angular clustering
+;;
+(defn angular-cluster [data k]
+  (let [angle-per-cluster (/ (* 2 Math/PI) k)]
+    (->>
+      data
+      (map
+        (fn [[u x y :as point]]
+          {(int (Math/floor (/ (+ (Math/atan2 x y) Math/PI) angle-per-cluster))) [point]}))
+      (reduce (partial merge-with concat) {}))))
 
 (def cluster k-means-cluster)
