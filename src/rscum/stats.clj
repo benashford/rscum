@@ -15,7 +15,7 @@
 (defn null-sim [a b]
   0.5)
 
-(defn set-overlap
+(defn jaccard
   "Calculate the Jaccard Index between two sets - 0 being lowest"
   [a b]
   (-
@@ -23,14 +23,14 @@
     (let [pcount (count (union a b))]
       (if (= pcount 0)
         0.0
-        (Math/sqrt (double (/ (count (intersection a b)) pcount)))))))
+        (double (/ (count (intersection a b)) pcount))))))
 
 (defn tanimoto [ff a b]
-  (let [so (- 1 (set-overlap a b))]
+  (let [so (- 1 (jaccard a b))]
     (if (= 0.0 so) ff (* -1 (log2 so)))))
 
 ;; The default similarity scoring function
-(def similarity (partial tanimoto 10.0))
+(def similarity (partial tanimoto 14.0))
 
 ;;
 ;; Similarity scoring - post-processing
