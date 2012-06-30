@@ -209,4 +209,4 @@
           {(int (Math/floor (/ (+ (Math/atan2 x y) Math/PI) angle-per-cluster))) [point]}))
       (reduce (partial merge-with concat) {}))))
 
-(def cluster k-means-cluster)
+(def cluster angular-cluster)
