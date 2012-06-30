@@ -45,7 +45,7 @@
   (proto-tanimoto dice ff a b))
 
 ;; The default similarity scoring function
-(def similarity null-sim);;(partial dice-tanimoto 12.5))
+(def similarity (partial dice-tanimoto 12.5))
 
 ;;
 ;; Similarity scoring - post-processing
@@ -64,7 +64,7 @@
         [k (* (- v lowest) multiplier)])
       s)))
 
-(def post-process null-pp)
+(def post-process normalise-second)
 
 (defn similarity-edges
   "The edges of a graph, defined as similarity"
