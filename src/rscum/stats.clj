@@ -201,7 +201,7 @@
 
 (def euclidian-by-centoid (partial by-centoid (fn [[_ x y] centoid] (euclidian-distance [x y] centoid))))
 
-(defn- re-centre-centoids [points-by-centoid]
+(defn- euclidian-re-centre-centoids [points-by-centoid]
   {:pre [(> (count points-by-centoid) 0)]
    :post [(= (count %) (count points-by-centoid))]}
   (map
@@ -215,23 +215,50 @@
         [new-x new-y]))
     points-by-centoid))
 
-(defn k-means-cluster [data k]
-  (loop [centoids (map (fn [_] [(rand-double -0.5 0.5) (rand-double -0.5 0.5)]) (range k))
+(defn generic-k-means-cluster [centoid-gen-f by-centoid-f re-centre-centoids-f data k]
+  (loop [centoids (map centoid-gen-f (range k))
          iterations 50]
-    (let [points-by-centoid (euclidian-by-centoid data centoids)]
+    (let [points-by-centoid (by-centoid-f data centoids)]
       (if (<= iterations 0)
         points-by-centoid
-        (recur (re-centre-centoids (map second points-by-centoid)) (dec iterations))))))
+        (recur (re-centre-centoids-f (map second points-by-centoid)) (dec iterations))))))
+
+(def k-means-cluster
+  (partial generic-k-means-cluster
+    (fn [_] [(rand-double -0.5 0.5) (rand-double -0.5 0.5)])
+    euclidian-by-centoid
+    euclidian-re-centre-centoids))
 
 ;; Angular clustering
 ;;
+(def two-pi (* 2 Math/PI))
+
+(defn- x-y-to-angle [x y]
+  (+ (Math/atan2 x y) Math/PI))
+
+(def angular-by-centoid (partial by-centoid (fn [[_ x y] centoid] (Math/abs (- (x-y-to-angle x y) centoid)))))
+
+(defn- angular-re-centre-centoids [points-by-centoid]
+  (map
+    (fn [points-for-centoid]
+      (let [num-points (count points-for-centoid)
+            angles-for-centoid (map (fn [[_ x y]] (x-y-to-angle x y)) points-for-centoid)]
+        (if (= num-points 0) (rand-double 0 two-pi) (/ (reduce + angles-for-centoid) num-points))))
+    points-by-centoid))
+
+(def angular-k-means-cluster
+  (partial generic-k-means-cluster
+    (fn [_] (rand-double 0.0 two-pi))
+    angular-by-centoid
+    angular-re-centre-centoids))
+
 (defn angular-cluster [data k]
-  (let [angle-per-cluster (/ (* 2 Math/PI) k)]
+  (let [angle-per-cluster (/ two-pi k)]
     (->>
       data
       (map
         (fn [[u x y :as point]]
-          {(int (Math/floor (/ (+ (Math/atan2 x y) Math/PI) angle-per-cluster))) [point]}))
+          {(->> angle-per-cluster (+ (x-y-to-angle x y)) / Math/floor int) [point]}))
       (reduce (partial merge-with concat) {}))))
 
-(def cluster k-means-cluster)
+(def cluster angular-k-means-cluster)
