@@ -44,8 +44,19 @@
 (defn dice-tanimoto [ff a b]
   (proto-tanimoto dice ff a b))
 
+(defn overlap-coefficient [a b]
+  (-
+    1
+    (let [divisor (min (count a) (count b))]
+      (if (= divisor 0)
+        0.0
+        (double (/ (count (intersection a b)) divisor))))))
+
+(defn overlap-tanimoto [ff a b]
+  (proto-tanimoto overlap-coefficient ff a b))
+
 ;; The default similarity scoring function
-(def similarity (partial dice-tanimoto 12.5))
+(def similarity (partial overlap-tanimoto 11.0));;(partial dice-tanimoto 12.5))
 
 ;;
 ;; Similarity scoring - post-processing
@@ -261,4 +272,4 @@
           {(->> angle-per-cluster (+ (x-y-to-angle x y)) / Math/floor int) [point]}))
       (reduce (partial merge-with concat) {}))))
 
-(def cluster angular-k-means-cluster)
+(def cluster k-means-cluster)
