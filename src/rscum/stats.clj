@@ -16,7 +16,7 @@
   0.5)
 
 (defn jaccard
-  "Calculate the Jaccard Index between two sets - 0 being lowest"
+  "Calculate the Jaccard Index between two sets - 0 being closest"
   [a b]
   (-
     1
@@ -25,12 +25,27 @@
         0.0
         (double (/ (count (intersection a b)) pcount))))))
 
-(defn tanimoto [ff a b]
-  (let [so (- 1 (jaccard a b))]
+(defn- proto-tanimoto [f ff a b]
+  (let [so (- 1 (f a b))]
     (if (= 0.0 so) ff (* -1 (log2 so)))))
 
+(defn tanimoto [ff a b]
+  (proto-tanimoto jaccard ff a b))
+
+(defn dice [a b]
+  (-
+    1
+    (let [divisor (+ (count a) (count b))]
+      (if (= divisor 0)
+        0.0
+        (double
+          (/ (* 2 (count (intersection a b))) divisor))))))
+
+(defn dice-tanimoto [ff a b]
+  (proto-tanimoto dice ff a b))
+
 ;; The default similarity scoring function
-(def similarity (partial tanimoto 14.0))
+(def similarity (partial dice-tanimoto 12.5))
 
 ;;
 ;; Similarity scoring - post-processing
