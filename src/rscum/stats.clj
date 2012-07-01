@@ -200,12 +200,14 @@
   (letfn [
     (find-centoid [point]
       (->>
-        (map (fn [centoid] [(distance-f point centoid) centoid]) centoids)
+        centoids
+        (map (fn [centoid] [(distance-f point centoid) centoid]))
         (sort-by first)
         first
         second))]
     (->>
-      (map (fn [point] {(find-centoid point) [point]}) data)
+      data
+      (map (fn [point] {(find-centoid point) [point]}))
       (reduce
         (partial merge-with concat)
         (reduce (fn [h k] (assoc h k [])) {} centoids)))))
