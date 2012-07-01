@@ -4,9 +4,9 @@ NOTES
   a. "following" other users
   b. "watching" repositories - your own by default, plus others you choose.
 2. Fully connected graph of users - stress minimisation. (show plot with constant distance)
-3. Similarity metric - Jaccard Distance ** DEFINITION: |AnB| / |AuB|
-  a. plain Jaccard distance (show histogram and plot)
-  b. variation: Tanimoto
+3. Similarity metric - Jaccard Index ** DEFINITION: |AnB| / |AuB|
+  a. plain Jaccard Index (show histogram and plot)
+  b. variation: Tanimoto Distance
     i. Show histogram - classic normal bell curve
     ii. Show plot - doesn't seem much better, but users who "watch" the most are in the centre.
     iii. (? related to above) k-means doesn't provide much value, as the centre group follows everything.  Pizza-slicing
