@@ -49,7 +49,7 @@
 (defn produce-one-cluster-information [cluster members watching ranks callback-f]
   (let [distance-from-centre (into {} (map (fn [[u x y]] [u (Math/hypot x y)]) members))]
     (callback-f (str "CLUSTER " cluster))
-    (callback-f " - members:")
+    (callback-f (format " - members (total: %d):" (count members)))
     (doseq [
       line
         (util/space-columns

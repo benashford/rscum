@@ -5,5 +5,4 @@ TODO
 - Nearest neighbours for a particular user
 - Automatically decide on correct number of clusters
 - Different clustering algorithms
-- Show cardinality of each cluster in cluster report
 - Check standalone similarity scores still work
