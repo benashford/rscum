@@ -85,12 +85,19 @@
         edges (stats/similarity-edges sim-f post-f watching)]
     (results/save-similarity-histogram edges filename)))
 
+(defn plot-2d
+  "Uses a stress minimisation algorithm to plot users in 2 dimensions - WARNING: takes many minutes"
+  []
+  (let [watching (data/load-watching)]
+    (doseq [user-2d (stats/reduce-dimensions (keys watching) watching)]
+      (data/save-2d user-2d))))
+
 (defn save-clusters
-  "Plot the 2d graph, calculate the clusters, and saves to the database - WARNING: takes many minutes"
+  "Calculate the clusters, and saves to the database - WARNING: plot-2d must have been called first"
   [k]
   (time
     (let [watching (data/load-watching)
-          flattened (stats/reduce-dimensions (keys watching) watching)
+          flattened (data/load-2d)
           clustered (stats/cluster flattened k)
           numbered-clusters (util/rearrange [1 0] (util/zip (map second clustered) (range)))]
       (doseq [[number elements] numbered-clusters]

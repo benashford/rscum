@@ -56,7 +56,7 @@
   (proto-tanimoto overlap-coefficient ff a b))
 
 ;; The default similarity scoring function
-(def similarity (partial overlap-tanimoto 11.0));;(partial dice-tanimoto 12.5))
+(def similarity (partial overlap-tanimoto 11.0))
 
 ;;
 ;; Similarity scoring - post-processing

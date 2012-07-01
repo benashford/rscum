@@ -93,14 +93,27 @@
     (doseq [username usernames]
       (redis/srem +crawled-users+ username))))
 
+(defn save-2d [[user x y]]
+  (redis/with-server +redis-server+
+    (redis/hmset
+      (user-info-key user)
+      "x" x
+      "y" y)))
+
+(defn load-2d []
+  (redis/with-server +redis-server+
+    (mapv
+      (fn [user]
+        (let [[x y] (redis/hmget (user-info-key user) "x" "y")]
+          [user (Double/parseDouble x) (Double/parseDouble y)]))
+      (load-users))))
+
 (defn save-clusters [cluster-num elements]
   (redis/with-server +redis-server+
     (doseq [[user x y] elements]
       (redis/hmset
         (user-info-key user)
-        "cluster" cluster-num
-        "x" x
-        "y" y))))
+        "cluster" cluster-num))))
 
 (defn load-clusters []
   (redis/with-server +redis-server+
