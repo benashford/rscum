@@ -147,13 +147,14 @@
   "Called once-per-node-per-iteration, returns the new position"
   [[user pos-x pos-y] full-positions edge]
   {:pre [(> (count full-positions) 0)]}
-  (let [pos [pos-x pos-y]
+  (let [learning-rate (double (/ 1 (count full-positions)))
+        pos [pos-x pos-y]
         positions (map (fn [[_ x y]] [x y]) full-positions)
         distances (map (fn [o-pos] (euclidian-distance pos o-pos)) positions)
         error-terms (calc-error-terms (zip (map first full-positions) distances) (partial edge user))
         total-error-term (->> error-terms (map #(Math/abs %)) (reduce +))
         grad (calc-grad pos (zip positions distances error-terms))
-        move (fn [p gidx] (- p (* (/ 1 (count positions)) (nth grad gidx))))]
+        move (fn [p gidx] (- p (* learning-rate (nth grad gidx))))]
     [user (move pos-x 0) (move pos-y 1) total-error-term]))
 
 (defn reduce-dimensions-iteration
