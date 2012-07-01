@@ -4,3 +4,4 @@ TODO
 - Investigate the damping of the dimension flattening
 - Nearest neighbours for a particular user
 - Automatically decide on correct number of clusters
+- Different clustering algorithms
