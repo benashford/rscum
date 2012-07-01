@@ -6,3 +6,5 @@ TODO
 - Automatically decide on correct number of clusters
 - Different clustering algorithms
 - Check standalone similarity scores still work
+
+Finally: re-run best flattening algorithm again, to identify correct distances
