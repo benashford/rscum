@@ -59,8 +59,8 @@
     (keys watching-data)
     (remove #{user-a})
     (map (fn [user-b] [user-b (similarity watching-data user-a user-b)]))
-    (filter #(> (second %) 0))
-    (sort-by second)))
+    (sort-by second)
+    (take 50)))
 
 (defn show-clusters
   "Loads and shows the saved clustered data"
