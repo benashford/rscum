@@ -3,4 +3,4 @@ TODO
 - Test different "normalisation" methods
 - Investigate the damping of the dimension flattening
 - Nearest neighbours for a particular user
-- Attempt one run with very biased distance function (biased towards close distances)
+- Automatically decide on correct number of clusters
