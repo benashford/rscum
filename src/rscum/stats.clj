@@ -139,7 +139,7 @@
       (fn [[other-positions distance error-term]]
         (mapv
           (fn [[position other-position]]
-            (* (/ (- position other-position) distance) error-term))
+            (-> (- position other-position) (/ distance) (* error-term)))
           (zip positions other-positions)))
       pde)))
 
