@@ -13,8 +13,9 @@
         concat-results
         (recur concat-results (inc page))))))
 
-(defn following-users [username]
-  (map :login (fetch-all following username)))
+(defmacro fromgithub [fn-name params after before]
+  `(defn ~fn-name ~params
+    (~@after (fetch-all ~@before))))
 
-(defn watching-repos [username]
-  (map :full_name (fetch-all watching username)))
+(fromgithub following-users [username] (map :login) (following username))
+(fromgithub watching-repos [username] (map :full_name) (watching username))
