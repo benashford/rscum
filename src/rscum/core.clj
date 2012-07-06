@@ -46,6 +46,15 @@
           user-ranks (rank/page-rank following-hash)]
       (data/save-ranks user-ranks))))
 
+(defn crawl-and-rank [target rank-every]
+  (rank)
+  (loop [next-target rank-every]
+    (crawl next-target)
+    (rank)
+    (if
+      (< next-target target)
+      (recur (+ next-target rank-every)))))
+
 (defn show-rank []
   (let [ordered-users (data/get-users-by-rank)]
     (doseq [[user rank] (take 100 ordered-users)]
