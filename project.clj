@@ -8,4 +8,5 @@
                  [net.sf.jung/jung-algorithms "2.0.1"]
                  [incanter "1.3.0"]]
   :main rscum.core
+  :plugins [[lein-swank "1.4.4"]]
   :jvm-opts ["-Xmx1g"])
