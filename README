@@ -4,3 +4,4 @@
 2) Install Redis (http://redis.io/)
 3) Type: lein repl
 4) Have a look at core.clj to see what top-level functions there are
+
