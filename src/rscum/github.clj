@@ -1,6 +1,7 @@
 (ns rscum.github
   (:use [tentacles.users :only [following]])
-  (:use [tentacles.repos :only [watching]]))
+  (:use [tentacles.repos :only [watching]])
+  (:use [tentacles.core :only [api-call]]))
 
 (def +per-page+ 100)
 
@@ -19,3 +20,8 @@
 
 (fromgithub following-users [username] (map :login) (following username))
 (fromgithub watching-repos [username] (map :full_name) (watching username))
+
+;; Temporary until a newer version of Tentacles is published on Clojars
+
+(defn rate-limit []
+  (api-call :get "rate_limit" nil nil))
