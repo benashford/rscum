@@ -136,3 +136,8 @@
       (data/load-watching)
       data/get-rank
       (fn [line] (.write wrtr (str line \newline))))))
+
+(defn -main [arg-1 arg-2 & args]
+  (let [target (Integer/parseInt arg-1)
+        rank-every (Integer/parseInt arg-2)]
+    (crawl-and-rank target rank-every)))
